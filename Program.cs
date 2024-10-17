@@ -16,6 +16,7 @@ using (var context = new DbElectroShopContext(optionsBuilder.Options))
 
     while (continuer)
     {
+        Console.WriteLine("***********************************************");
         Console.WriteLine("Que souhaitez-vous faire?");
         Console.WriteLine("1. Ajouter un produit");
         Console.WriteLine("2. Ajouter un client");
@@ -23,24 +24,32 @@ using (var context = new DbElectroShopContext(optionsBuilder.Options))
         Console.WriteLine("4. Passer une commande");
         Console.WriteLine("5. Afficher une commande avec Lazy Loading");
         Console.WriteLine("6. Afficher une commande avec Eager Loading");
-        Console.WriteLine("7. Quitter");
+        Console.WriteLine("7. Afficher les commandes d'un client (Procédure stockée)");
+        Console.WriteLine("8. Passer une commande via procédure stockée");
+        Console.WriteLine("9. Afficher les commandes avec leur total (Vue)");
+        Console.WriteLine("10. Quitter");
+        Console.WriteLine("***********************************************");
         Console.Write("Choisissez une option: ");
+       
 
         string choix = Console.ReadLine();
 
         switch (choix)
         {
             case "1":
+                Console.WriteLine("----------------------------------------");
                 produitService.AjouterProduit();
                 break;
             case "2":
+                Console.WriteLine("----------------------------------------");
                 clientService.AjouterClient();
                 break;
             case "3":
+                Console.WriteLine("----------------------------------------");
                 produitService.MettreAJourProduit();
                 break;
             case "4":
-                // Saisie du client et des produits pour la commande
+                Console.WriteLine("----------------------------------------");
                 Console.Write("Entrez l'ID du client: ");
                 int clientId = Convert.ToInt32(Console.ReadLine());
 
@@ -49,6 +58,7 @@ using (var context = new DbElectroShopContext(optionsBuilder.Options))
 
                 while (ajouterProduits)
                 {
+                    
                     Console.Write("Entrez l'ID du produit: ");
                     int produitId = Convert.ToInt32(Console.ReadLine());
 
@@ -65,16 +75,57 @@ using (var context = new DbElectroShopContext(optionsBuilder.Options))
                 commandeService.PasserCommande(clientId, produitsCommandes);
                 break;
             case "5":
+                Console.WriteLine("----------------------------------------");
                 Console.Write("Entrez l'ID de la commande : ");
                 int commandeIdLazy = Convert.ToInt32(Console.ReadLine());
                 commandeService.TesterLazyLoading(commandeIdLazy);
                 break;
             case "6":
+                Console.WriteLine("----------------------------------------");
                 Console.Write("Entrez l'ID de la commande : ");
                 int commandeIdEager = Convert.ToInt32(Console.ReadLine());
                 commandeService.TesterEagerLoading(commandeIdEager);
                 break;
             case "7":
+                Console.WriteLine("----------------------------------------");
+                // Appel de la procédure stockée pour récupérer les commandes d'un client
+                Console.Write("Entrez l'ID du client pour voir ses commandes: ");
+                int clientIdProc = Convert.ToInt32(Console.ReadLine());
+                commandeService.GetCommandesByClient(clientIdProc);
+                break;
+            case "8":
+                Console.WriteLine("----------------------------------------");
+
+                Console.Write("Entrez l'ID du client: ");
+                int client_Id = Convert.ToInt32(Console.ReadLine());
+
+                Console.Write("Entrez le statut de la commande: ");
+                string statut = Console.ReadLine();
+
+                var produits_Commandes = new Dictionary<int, int>();
+                bool ajouter_Produits = true;
+
+                while (ajouter_Produits)
+                {
+                    Console.Write("Entrez l'ID du produit: ");
+                    int produitId = Convert.ToInt32(Console.ReadLine());
+
+                    Console.Write("Entrez la quantité: ");
+                    int quantite = Convert.ToInt32(Console.ReadLine());
+
+                    produits_Commandes.Add(produitId, quantite);
+
+                    Console.Write("Ajouter un autre produit à la commande ? (o/n): ");
+                    ajouter_Produits = Console.ReadLine().ToLower() == "o";
+                }
+                commandeService.AddCommandeWithLignes(client_Id, produits_Commandes, statut);
+                break;
+            case "9":
+                // Afficher les commandes avec leur total (via la vue)
+                Console.WriteLine("----------------------------------------");
+                commandeService.GetCommandesAvecTotal();
+                break;
+            case "10":
                 continuer = false;
                 Console.WriteLine("Fin du programme.");
                 break;
@@ -82,5 +133,6 @@ using (var context = new DbElectroShopContext(optionsBuilder.Options))
                 Console.WriteLine("Choix invalide. Veuillez réessayer.");
                 break;
         }
+        Console.WriteLine("***********************************************");
     }
 }

@@ -18,25 +18,45 @@ namespace ConsoleElectroShop.Services
 
         public void AjouterProduit()
         {
-            Console.Write("Entrez le nom du produit: ");
-            string nom = Console.ReadLine();
+            try {
+                Console.Write("Entrez le nom du produit: ");
+                string nom = Console.ReadLine();
 
-            Console.Write("Entrez le prix du produit: ");
-            int prix = Convert.ToInt32(Console.ReadLine());
+                if (string.IsNullOrEmpty(nom))
+                {
+                    throw new Exception("Le nom du produit ne peut pas être vide.");
+                }
 
-            Console.Write("Entrez la quantité en stock: ");
-            int stock = Convert.ToInt32(Console.ReadLine());
+                Console.Write("Entrez le prix du produit: ");
+                int prix = Convert.ToInt32(Console.ReadLine());
+                if (prix <= 0)
+                {
+                    throw new Exception("Le prix du produit doit être supérieur à 0.");
+                }
 
-            var produit = new Produit
+                Console.Write("Entrez la quantité en stock: ");
+                int stock = Convert.ToInt32(Console.ReadLine());
+
+                var produit = new Produit
+                {
+                    Nom = nom,
+                    Prix = prix,
+                    Stock = stock
+                };
+
+                _context.Produits.Add(produit);
+                _context.SaveChanges();
+                Console.WriteLine($"Produit '{nom}' ajouté avec succès.");
+            }
+        catch (FormatException fe)
+                {
+                    Console.WriteLine($"Erreur de format : {fe.Message}. Veuillez entrer des données valides.");
+                }
+        catch (Exception ex)
             {
-                Nom = nom,
-                Prix = prix,
-                Stock = stock
-            };
+                    Console.WriteLine($"Erreur lors de l'ajout du produit : {ex.Message}");
+            }
 
-            _context.Produits.Add(produit);
-            _context.SaveChanges();
-            Console.WriteLine($"Produit '{nom}' ajouté avec succès.");
         }
 
 
