@@ -1,4 +1,5 @@
 ﻿using ConsoleElectroShop.Modeles;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -78,6 +79,65 @@ namespace ConsoleElectroShop.Services
                     // En cas d'erreur, on annule la transaction
                     transaction.Rollback();
                     Console.WriteLine($"Erreur lors du passage de la commande : {ex.Message}");
+                }
+            }
+        }
+
+        public void TesterLazyLoading(int commandeId)
+        {
+            var stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+
+            var commande = _context.Commandes.FirstOrDefault(c => c.Id == commandeId);
+            Console.WriteLine($"Commande ID: {commande.Id}, Date: {commande.Date}");
+
+            foreach (var ligne in commande.LignesCommandes)
+            {
+                Console.WriteLine($"Produit ID = {ligne.ProduitId}, Quantité = {ligne.Quantite}");
+            }
+
+            stopwatch.Stop();
+            Console.WriteLine($"Temps Lazy Loading: {stopwatch.ElapsedMilliseconds} ms");
+        }
+
+        public void TesterEagerLoading(int commandeId)
+        {
+            var stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+
+            var commande = _context.Commandes
+                .Include(c => c.LignesCommandes)
+                .FirstOrDefault(c => c.Id == commandeId);
+
+            Console.WriteLine($"Commande ID: {commande.Id}, Date: {commande.Date}");
+
+            foreach (var ligne in commande.LignesCommandes)
+            {
+                Console.WriteLine($"Produit ID = {ligne.ProduitId}, Quantité = {ligne.Quantite}");
+            }
+
+            stopwatch.Stop();
+            Console.WriteLine($"Temps Eager Loading: {stopwatch.ElapsedMilliseconds} ms");
+        }
+
+
+        // Méthode pour afficher toutes les commandes
+        public void AfficherToutesLesCommandes()
+        {
+            var commandes = _context.Commandes.ToList();
+
+            if (!commandes.Any())
+            {
+                Console.WriteLine("Aucune commande n'a été trouvée.");
+                return;
+            }
+
+            foreach (var commande in commandes)
+            {
+                Console.WriteLine($"\nCommande ID = {commande.Id}, Date = {commande.Date}, Statut = {commande.Statut}");
+                foreach (var ligne in commande.LignesCommandes)
+                {
+                    Console.WriteLine($"\tProduit ID = {ligne.ProduitId}, Quantité = {ligne.Quantite}, Prix Unitaire = {ligne.PrixUnitaire}");
                 }
             }
         }
