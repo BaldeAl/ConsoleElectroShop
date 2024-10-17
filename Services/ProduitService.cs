@@ -96,6 +96,26 @@ namespace ConsoleElectroShop.Services
                 Console.WriteLine("Produit non trouvé.");
             }
         }
+
+        //fonction pour afficher tout les produits
+        public void AfficherLesProduits()
+        {
+            var produits = _context.Produits.ToList();
+
+            if (produits.Any())
+            {
+                Console.WriteLine("Liste des produits :");
+                foreach (var produit in produits)
+                {
+                    Console.WriteLine($"ID: {produit.Id}, Nom: {produit.Nom}, Prix: {produit.Prix}, Stock: {produit.Stock}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Aucun produit trouvé.");
+            }
+        }
+
     }
 
 }

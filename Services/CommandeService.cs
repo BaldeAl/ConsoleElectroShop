@@ -216,7 +216,7 @@ namespace ConsoleElectroShop.Services
             {
                 // Appel de la procédure stockée
                 var commandes = _context.Commandes
-                    .FromSqlInterpolated($"EXEC GetCommandesByClient @ClientId={clientId}")
+                    .FromSqlRaw($"EXEC GetCommandesByClient @ClientId={clientId}")
                     .ToList();
 
                 if (commandes.Any())

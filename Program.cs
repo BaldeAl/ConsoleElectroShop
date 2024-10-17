@@ -27,12 +27,15 @@ using (var context = new DbElectroShopContext(optionsBuilder.Options))
         Console.WriteLine("7. Afficher les commandes d'un client (Procédure stockée)");
         Console.WriteLine("8. Passer une commande via procédure stockée");
         Console.WriteLine("9. Afficher les commandes avec leur total (Vue)");
-        Console.WriteLine("10. Quitter");
+        Console.WriteLine("10. Afficher tout les produits ");
+        Console.WriteLine("11. Afficher tout les clients ");
+        Console.WriteLine("12. Quitter");
         Console.WriteLine("***********************************************");
         Console.Write("Choisissez une option: ");
-       
+        
 
         string choix = Console.ReadLine();
+        Console.Clear();
 
         switch (choix)
         {
@@ -126,6 +129,14 @@ using (var context = new DbElectroShopContext(optionsBuilder.Options))
                 commandeService.GetCommandesAvecTotal();
                 break;
             case "10":
+                Console.WriteLine("----------------------------------------");
+                produitService.AfficherLesProduits();
+                break;
+            case "11":
+                Console.WriteLine("----------------------------------------");
+                clientService.AfficherLesClients();
+                break;
+            case "12":
                 continuer = false;
                 Console.WriteLine("Fin du programme.");
                 break;
@@ -133,6 +144,13 @@ using (var context = new DbElectroShopContext(optionsBuilder.Options))
                 Console.WriteLine("Choix invalide. Veuillez réessayer.");
                 break;
         }
-        Console.WriteLine("***********************************************");
+        if (continuer)
+        {
+            Console.WriteLine("***********************************************");
+            Console.WriteLine("Appuyez sur une touche pour continuer...");
+            Console.ReadKey();
+            Console.Clear(); // Effacer l'écran avant d'afficher le menu à nouveau
+        }
+
     }
 }
