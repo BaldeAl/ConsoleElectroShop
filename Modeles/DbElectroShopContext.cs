@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ConsoleElectroShop.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ConsoleElectroShop.Modeles;
@@ -26,12 +27,11 @@ public partial class DbElectroShopContext : DbContext
     public virtual DbSet<Produit> Produits { get; set; }
 
     public virtual DbSet<Stock> Stocks { get; set; }
+    public virtual DbSet<VCommandesAvecTotal> VCommandesAvecTotals { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
          => optionsBuilder
-                .UseLazyLoadingProxies()
-                .UseSqlServer("Server=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\balde\\source\\repos\\ConsoleElectroShop\\Data\\DbElectroShop.mdf;Database=DbElectroShop;Integrated Security=True")
-                .LogTo(Console.WriteLine);
+                .UseSqlServer("Server=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\balde\\source\\repos\\ConsoleElectroShop\\Data\\DbElectroShop.mdf;Database=DbElectroShop;Integrated Security=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -116,6 +116,16 @@ public partial class DbElectroShopContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Stock__ProduitID__46E78A0C");
         });
+        modelBuilder.Entity<VCommandesAvecTotal>(entity =>
+        {
+
+            entity.HasNoKey();
+            entity.ToView("V_CommandesAvecTotal");
+            entity.Property(e => e.Id).HasColumnName("Id");
+            entity.Property(e => e.Total).HasColumnType("Total");
+        });
+
+        OnModelCreatingPartial(modelBuilder);
 
         OnModelCreatingPartial(modelBuilder);
     }

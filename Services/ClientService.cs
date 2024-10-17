@@ -38,6 +38,27 @@ namespace ConsoleElectroShop.Services
             _context.SaveChanges();
             Console.WriteLine($"Client '{nom}' ajouté avec succès.");
         }
+
+        public void AfficherLesClients()
+        {
+            var clients = _context.Clients.ToList();
+
+            if (clients.Any())
+            {
+                Console.WriteLine("Liste des clients :");
+                foreach (var client in clients)
+                {
+                    Console.WriteLine($"ID: {client.Id}, Nom: {client.Nom}, Adresse: {client.Adresse}, Email: {client.Email}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Aucun client trouvé.");
+            }
+        }
+
+
+
     }
 
 }

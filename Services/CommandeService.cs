@@ -23,6 +23,15 @@ namespace ConsoleElectroShop.Services
             {
                 try
                 {
+
+                    // Vérifier si le client existe
+                    var client = _context.Clients.Find(clientId);
+                    if (client == null)
+                    {
+                        throw new Exception($"Le client avec l'ID {clientId} n'existe pas.");
+                    }
+
+
                     // Créer la commande
                     var commande = new Commande
                     {
@@ -79,6 +88,64 @@ namespace ConsoleElectroShop.Services
                     // En cas d'erreur, on annule la transaction
                     transaction.Rollback();
                     Console.WriteLine($"Erreur lors du passage de la commande : {ex.Message}");
+                }
+            }
+        }
+
+
+        // Méthode pour ajouter une commande et ses lignes de commande via une procédure stockée
+        public void AddCommandeWithLignes(int clientId, Dictionary<int, int> produitsCommandes, string statut)
+        {
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    var dateCommande = DateTime.Now;
+
+                    // Appel de la procédure stockée pour ajouter la commande
+                    var commandeIdResult = _context.Database.ExecuteSqlInterpolated(
+                        $"DECLARE @CommandeId INT; EXEC @CommandeId = AddCommande @ClientId={clientId}, @DateCommande={dateCommande}, @Statut={statut}; SELECT @CommandeId;"
+                    );
+
+                    int commandeId = commandeIdResult;
+
+                    Console.WriteLine($"Commande ID {commandeId} ajoutée.");
+
+                    // Ajouter les lignes de commande associées
+                    foreach (var produitCommande in produitsCommandes)
+                    {
+                        int produitId = produitCommande.Key;
+                        int quantite = produitCommande.Value;
+
+                        
+                        var produit = _context.Produits.Find(produitId);
+                        if (produit == null)
+                        {
+                            throw new Exception($"Le produit avec l'ID {produitId} n'existe pas.");
+                        }
+
+                        var ligneCommande = new LignesCommande
+                        {
+                            CommandeId = commandeId, 
+                            ProduitId = produitId,
+                            Quantite = quantite,
+                            PrixUnitaire = produit.Prix
+                        };
+
+                        _context.LignesCommandes.Add(ligneCommande);
+                    }
+
+                    _context.SaveChanges();
+
+                    
+                    transaction.Commit();
+                    Console.WriteLine("Lignes de commande ajoutées avec succès.");
+                }
+                catch (Exception ex)
+                {
+                  
+                    transaction.Rollback();
+                    Console.WriteLine($"Erreur lors de l'ajout de la commande et des lignes : {ex.Message}");
                 }
             }
         }
@@ -141,6 +208,48 @@ namespace ConsoleElectroShop.Services
                 }
             }
         }
+
+        // Méthode pour récupérer les commandes d'un client via la procédure stockée
+        public void GetCommandesByClient(int clientId)
+        {
+            try
+            {
+                // Appel de la procédure stockée
+                var commandes = _context.Commandes
+                    .FromSqlRaw($"EXEC GetCommandesByClient @ClientId={clientId}")
+                    .ToList();
+
+                if (commandes.Any())
+                {
+                    Console.WriteLine($"Commandes du client {clientId}:");
+                    foreach (var commande in commandes)
+                    {
+                        Console.WriteLine($"Commande ID: {commande.Id}, Date: {commande.Date}, Statut: {commande.Statut}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Aucune commande trouvée pour le client avec l'ID {clientId}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de l'appel de la procédure stockée : {ex.Message}");
+            }
+        }
+
+
+        // Méthode pour récupérer les commandes avec leur total
+        public void GetCommandesAvecTotal()
+        {
+            var commandesAvecTotal = _context.VCommandesAvecTotals.ToList();
+
+            foreach (var commande in commandesAvecTotal)
+            {
+                Console.WriteLine($"Commande ID: {commande.Id}, Total: {commande.Total}");
+            }
+        }
+
     }
 
 }
